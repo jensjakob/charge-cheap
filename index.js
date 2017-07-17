@@ -1,15 +1,9 @@
-// node --use_strict index.js
+const https = require("https")
+const Encryption = require('./encryption.js')
 
 const moment = require('moment')
 const nordpool = require('nordpool')
 const prices = new nordpool.Prices()
-
-require('dotenv').config()
-
-"use strict"
-
-const https = require("https")
-const Encryption = require('./encryption.js')
 
 require('dotenv').config()
 
@@ -213,7 +207,7 @@ function maybeCharge(hoursNeeded) {
 
 			if (hoursNeeded > pricePerTime.length) {
 				console.log("Not enough hours tonight!")
-				hoursNeeded = pricePerTime.length
+				hoursNeeded = pricePerTime.length // TODO: Start chargeing without checking hours
 			}
 
 			let theHours = new Array()
@@ -223,12 +217,9 @@ function maybeCharge(hoursNeeded) {
 
 				if (time.getTime() == now.getTime()) {
 					//charge car if connected and not charging
-					console.log("Hours needed: ", hoursNeeded)
 					console.log("CHARGE CAR NOW!")
 
-					api("BatteryRemoteChargingRequest", function() {
-						console.log("Charge car command sent")
-					})
+					api("BatteryRemoteChargingRequest", function() {})
 
 				}
 
