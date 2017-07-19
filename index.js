@@ -14,110 +14,110 @@ const tomorrow = moment().add(1,"d").format("YYYY-MM-DD")
 
 getPrices("latest", (allPrices) => {
 
-    console.log("Check if you've got tomorrows prices")
-    if (moment(allPrices[0].date).format("YYYY-MM-DD") == tomorrow) {
-        
-        console.log("Todays prices are missing")
-        getPrices(today, (todayPrices) => {
-            allPrices.concat(todayPrices)
-            console.log("Adding todays prices")
-        })
-    }
+	console.log("Check if you've got tomorrows prices")
+	if (moment(allPrices[0].date).format("YYYY-MM-DD") == tomorrow) {
+		
+		console.log("Todays prices are missing")
+		getPrices(today, (todayPrices) => {
+			allPrices.concat(todayPrices)
+			console.log("Adding todays prices")
+		})
+	}
 
-    console.log("All received prices:")
-    console.log(allPrices)
+	console.log("All received prices:")
+	console.log(allPrices)
 
-    allPrices = removeUntilNow(allPrices)
-    console.log("After removal of old prices:")
-    console.log(allPrices)
+	allPrices = removeUntilNow(allPrices)
+	console.log("After removal of old prices:")
+	console.log(allPrices)
 
-    allPrices = removeAfter("0700", allPrices)
-    console.log("All prices until 7 am:")
-    console.log(allPrices)
+	allPrices = removeAfter("0700", allPrices)
+	console.log("All prices until 7 am:")
+	console.log(allPrices)
 
-    if (allPrices.length == 0) {
-        console.log("No prices yet, check again in the afternoon")
-    }
+	if (allPrices.length == 0) {
+		console.log("No prices yet, check again in the afternoon")
+	}
 
 	console.log("Finding out how many hours of chargeing is needed")
 	hoursNeeded = hoursNeeded()
 
-    if (hoursNeeded > allPrices.length) {
-        console.log("Not enough hours for a full charge tonight")
-        chargeNow()
-    } else {
-        if (timeIsNow(allPrices, hoursNeeded)) {
-            console.log("Now is a good time to start chargeing")
-            chargeNow()
-        }        
-    }
+	if (hoursNeeded > allPrices.length) {
+		console.log("Not enough hours for a full charge tonight")
+		chargeNow()
+	} else {
+		if (timeIsNow(allPrices, hoursNeeded)) {
+			console.log("Now is a good time to start chargeing")
+			chargeNow()
+		}        
+	}
 })
 
 
 function getPrices(to, _callback) {
-    let arr = new Array()
+	let arr = new Array()
 
-    if (to == "latest") {
-        options = {
-            area: 'SE3',
-            currency: 'EUR'
-        }
-        console.log("Get latest prices")
-    } else {
-        options = {
-            area: 'SE3',
-            currency: 'EUR',
-            to: to
-        }
-        console.log("Get prices for " + to )
-    }
+	if (to == "latest") {
+		options = {
+			area: 'SE3',
+			currency: 'EUR'
+		}
+		console.log("Get latest prices")
+	} else {
+		options = {
+			area: 'SE3',
+			currency: 'EUR',
+			to: to
+		}
+		console.log("Get prices for " + to )
+	}
 
-    prices.hourly(options, (error, results) => {
+	prices.hourly(options, (error, results) => {
 		if (error) console.err(error)
 
 		for (let i=0; i<results.length; i++) {
 			arr.push({
-                date: results[i].date.format("YYYY-MM-DD HH:mm"),
+				date: results[i].date.format("YYYY-MM-DD HH:mm"),
 				price: results[i].value.toFixed(2)
 			})
-        }
+		}
 
-        _callback(arr)
-    })
+		_callback(arr)
+	})
 }
 
 function removeUntilNow(arr) {
-    const now = moment().format("HH00")
+	const now = moment().format("HH00")
 
-    for (let key in arr) {
+	for (let key in arr) {
 
-        time = moment(arr[key].date).format("HHmm")
-        
-        if (time < now) {
-            delete arr[key]
-        }
-    }
+		time = moment(arr[key].date).format("HHmm")
+		
+		if (time < now) {
+			delete arr[key]
+		}
+	}
 
-    return cleanArray(arr)
+	return cleanArray(arr)
 }
 
 function removeAfter(hour, arr) {
 
-    for (let key in arr) {
+	for (let key in arr) {
 
-        time = moment(arr[key].date).format("HHmm")
-        
-        if (time > hour) {
-            delete arr[key]
-        }
-    }
+		time = moment(arr[key].date).format("HHmm")
+		
+		if (time > hour) {
+			delete arr[key]
+		}
+	}
 
-    return cleanArray(arr)
+	return cleanArray(arr)
 }
 
 function cleanArray(arr) {
-    console.log("Cleaning all deleted prices")
-    return arr.filter(function(n){ return n != undefined });
+	console.log("Cleaning all deleted prices")
+	return arr.filter(function(n){ return n != undefined });
 }
 
 function hoursNeeded() {
@@ -235,28 +235,28 @@ function api(action, _callback) {
 
 function timeIsNow(allPrices, hoursNeeded) {
 
-    allPrices.sort((a, b) => {
-        return a.price-b.price
-    })
-    console.log("Best price first:")
-    console.log(allPrices)
-    
-    const now = moment().format("HH00");
+	allPrices.sort((a, b) => {
+		return a.price-b.price
+	})
+	console.log("Best price first:")
+	console.log(allPrices)
+	
+	const now = moment().format("HH00");
 
-    for (let i = 0; i < hoursNeeded; i++) {
-        time = moment(allPrices[i].date).format("HHmm");
+	for (let i = 0; i < hoursNeeded; i++) {
+		time = moment(allPrices[i].date).format("HHmm");
 
-        console.log("Charge at " + time + ", now is " + now)
-        if (time == now) {
-            
-            return true
-            break
+		console.log("Charge at " + time + ", now is " + now)
+		if (time == now) {
+			
+			return true
+			break
 
-        }
-    }
+		}
+	}
 }
 
 function chargeNow() {
-    console.log("Charge car now")
-    // api("BatteryRemoteChargingRequest", () => {})
+	console.log("Charge car now")
+	// api("BatteryRemoteChargingRequest", () => {})
 }
