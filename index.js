@@ -12,65 +12,63 @@ let q, sessionid, vin
 const today = moment().format("YYYY-MM-DD")
 const tomorrow = moment().add(1,"d").format("YYYY-MM-DD")
 
-getPrices("latest", (allPrices) => {
+getPrices(tomorrow + " 07:00", (allPrices) => {
 
 	console.log("Check if you've got tomorrows prices")
-	if (moment(allPrices[0].date).format("YYYY-MM-DD") == tomorrow) {
-		
-		console.log("Todays prices are missing")
-		getPrices(today, (todayPrices) => {
-			allPrices.concat(todayPrices)
-			console.log("Adding todays prices")
-		})
-	}
-
-	console.log("All received prices:")
-	console.log(allPrices)
-
-	allPrices = removeUntilNow(allPrices)
-	console.log("After removal of old prices:")
-	console.log(allPrices)
-
-	allPrices = removeAfter("0700", allPrices)
-	console.log("All prices until 7 am:")
-	console.log(allPrices)
-
 	if (allPrices.length == 0) {
 		console.log("No prices yet, check again in the afternoon")
-	}
-
-	console.log("Finding out how many hours of chargeing is needed")
-	hoursNeeded = hoursNeeded()
-
-	if (hoursNeeded > allPrices.length) {
-		console.log("Not enough hours for a full charge tonight")
-		chargeNow()
 	} else {
-		if (timeIsNow(allPrices, hoursNeeded)) {
-			console.log("Now is a good time to start chargeing")
-			chargeNow()
-		}        
-	}
+
+		console.log("Tomorrows prices until 7am:")
+		console.log(allPrices)
+
+		getPrices(today + " 23:00", (todayPrices) => {
+			console.log(todayPrices)
+			console.log("Adding todays prices, " + today)
+			allPrices.push.apply(allPrices, todayPrices)
+
+			console.log("All received prices:")
+			console.log(allPrices)
+
+			console.log("Remove old prices:")
+			allPrices = removeUntilNow(allPrices)
+			console.log(allPrices)
+
+			// console.log("All prices until 7 am:")
+			// allPrices = removeAfter("0700", allPrices)
+			// console.log(allPrices)
+
+			console.log("Finding out how many hours of chargeing is needed")
+			
+			getHoursNeeded((hoursNeeded) => {
+				if (hoursNeeded > allPrices.length) {
+					console.log("Not enough hours for a full charge tonight")
+					chargeNow()
+				} else {
+					if (timeIsNow(allPrices, hoursNeeded)) {
+						console.log("Now is a good time to start chargeing")
+						chargeNow()
+					}        
+				}
+			}) // getHoursNeeded
+
+		}) // getPrices
+	
+
+	} // if
+
 })
 
 
 function getPrices(to, _callback) {
 	let arr = new Array()
 
-	if (to == "latest") {
-		options = {
-			area: 'SE3',
-			currency: 'EUR'
-		}
-		console.log("Get latest prices")
-	} else {
-		options = {
-			area: 'SE3',
-			currency: 'EUR',
-			to: to
-		}
-		console.log("Get prices for " + to )
+	options = {
+		area: 'SE3',
+		currency: 'EUR',
+		to: to
 	}
+	console.log("Get prices for " + to )
 
 	prices.hourly(options, (error, results) => {
 		if (error) console.err(error)
@@ -87,11 +85,11 @@ function getPrices(to, _callback) {
 }
 
 function removeUntilNow(arr) {
-	const now = moment().format("HH00")
+	const now = moment().format("YYYYMMDDHH00")
 
 	for (let key in arr) {
 
-		time = moment(arr[key].date).format("HHmm")
+		time = moment(arr[key].date).format("YYYYMMDDHH00")
 		
 		if (time < now) {
 			delete arr[key]
@@ -107,7 +105,13 @@ function removeAfter(hour, arr) {
 
 		time = moment(arr[key].date).format("HHmm")
 		
-		if (time > hour) {
+		let flagStartDeleting = false
+
+		if (time == hour) {
+			flagStartDeleting = true
+		}
+
+		if (flagStartDeleting) {
 			delete arr[key]
 		}
 	}
@@ -120,7 +124,7 @@ function cleanArray(arr) {
 	return arr.filter(function(n){ return n != undefined });
 }
 
-function hoursNeeded() {
+function getHoursNeeded(_callback) {
 
 	api("UserLoginRequest", (json) => {
 		if (json.VehicleInfoList) {
@@ -157,7 +161,7 @@ function hoursNeeded() {
 							}
 
 							console.log("Hours needed: " + hoursNeeded)
-							return hoursNeeded
+							_callback(hoursNeeded)
 
 						} else {
 							console.log("Car is already chargeing, can't stop it")
