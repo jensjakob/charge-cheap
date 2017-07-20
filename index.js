@@ -34,10 +34,6 @@ getPrices(tomorrow + " 07:00", (allPrices) => {
 			allPrices = removeUntilNow(allPrices)
 			console.log(allPrices)
 
-			// console.log("All prices until 7 am:")
-			// allPrices = removeAfter("0700", allPrices)
-			// console.log(allPrices)
-
 			console.log("Finding out how many hours of chargeing is needed")
 			
 			getHoursNeeded((hoursNeeded) => {
@@ -92,26 +88,6 @@ function removeUntilNow(arr) {
 		time = moment(arr[key].date).format("YYYYMMDDHH00")
 		
 		if (time < now) {
-			delete arr[key]
-		}
-	}
-
-	return cleanArray(arr)
-}
-
-function removeAfter(hour, arr) {
-
-	for (let key in arr) {
-
-		time = moment(arr[key].date).format("HHmm")
-		
-		let flagStartDeleting = false
-
-		if (time == hour) {
-			flagStartDeleting = true
-		}
-
-		if (flagStartDeleting) {
 			delete arr[key]
 		}
 	}
