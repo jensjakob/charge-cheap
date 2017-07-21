@@ -11,6 +11,7 @@ printf '%s\n' 'USERNAME: ' 'PASSWORD: ' >.env
 node index.js
 ```
 Don't forget adding your username and password to the .env-file
+
 Exit using ctrl+c
 
 ## Best practice
