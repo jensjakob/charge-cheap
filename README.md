@@ -7,7 +7,7 @@ Function will run during evening and night, each hour between 17pm and 7am.
 git clone https://github.com/jensjakob/charge-cheap.git
 cd charge-cheap
 npm install
-printf '%s\n' 'USERNAME: ' 'PASSWORD: ' >.env
+printf '%s\n' 'USERNAME=' 'PASSWORD=' >.env
 node index.js
 ```
 Don't forget adding your username and password to the .env-file
