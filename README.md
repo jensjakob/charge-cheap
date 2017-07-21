@@ -14,6 +14,10 @@ Don't forget adding your username and password to the .env-file
 
 Exit using ctrl+c
 
+## Update
+
+It will check for new versions, update using ``git pull``
+
 ## Best practice
 Set your car to automatically charge to be done in the morning at 8 am. This is a great way to make sure that your car is charged even if you experience problems with the code, the computer or the connection to the car.
 
