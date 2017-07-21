@@ -7,51 +7,87 @@ const prices = new nordpool.Prices()
 
 require('dotenv').config()
 
+var checkUpdate = require('check-update-github');
+var pkg = require('./package.json');
+
+var cron = require('node-cron');
+
+checkUpdate({
+	name: pkg.name,
+	currentVersion: pkg.version,
+	user: 'jensjakob',
+	branch: 'master'
+	}, function(err, latestVersion, defaultMessage){
+	if(!err){
+		console.log("")
+		console.log("=== WARNING! ===================")
+		console.warn(defaultMessage);
+		console.log("================================")
+		console.log("")
+	}
+});
+
+if (process.env.USERNAME == undefined) {
+	console.log("=== ERROR! ===================")
+	console.error("Username/password is missing.")
+	console.log("================================")
+	console.log("")
+	console.log("Create an .env file including:")
+	console.log("USERNAME: ")
+	console.log("PASSWORD: ")
+	console.log("")
+}
+
 let q, sessionid, vin
 
 const today = moment().format("YYYY-MM-DD")
 const tomorrow = moment().add(1,"d").format("YYYY-MM-DD")
 
-getPrices(tomorrow + " 07:00", (allPrices) => {
+console.log("Function will run during evening and night, each hour between 17pm and 7am")
+cron.schedule('0 0-7,17-23 * * *', () => {
 
-	console.log("Check if you've got tomorrows prices")
-	if (allPrices.length == 0) {
-		console.log("No prices yet, check again in the afternoon")
-	} else {
+	getPrices(tomorrow + " 07:00", (allPrices) => {
 
-		console.log("Tomorrows prices until 7am:")
-		console.log(allPrices)
+		console.log("Check if you've got tomorrows prices")
+		if (allPrices.length == 0) {
+			console.log("No prices yet, check again in the afternoon")
+		} else {
 
-		getPrices(today + " 23:00", (todayPrices) => {
-			console.log(todayPrices)
-			console.log("Adding todays prices, " + today)
-			allPrices.push.apply(allPrices, todayPrices)
-
-			console.log("All received prices:")
+			console.log("Tomorrows prices until 7am:")
 			console.log(allPrices)
 
-			console.log("Remove old prices:")
-			allPrices = removeUntilNow(allPrices)
-			console.log(allPrices)
+			getPrices(today + " 23:00", (todayPrices) => {
+				console.log(todayPrices)
+				console.log("Adding todays prices, " + today)
+				allPrices.push.apply(allPrices, todayPrices)
 
-			console.log("Finding out how many hours of chargeing is needed")
-			
-			getHoursNeeded((hoursNeeded) => {
-				if (hoursNeeded > allPrices.length) {
-					console.log("Not enough hours for a full charge tonight")
-					chargeNow()
-				} else {
-					if (timeIsNow(allPrices, hoursNeeded)) {
-						console.log("Now is a good time to start chargeing")
+				console.log("All received prices:")
+				console.log(allPrices)
+
+				console.log("Remove old prices:")
+				allPrices = removeUntilNow(allPrices)
+				console.log(allPrices)
+
+				console.log("Finding out how many hours of chargeing is needed")
+
+				getHoursNeeded((hoursNeeded) => {
+					if (hoursNeeded > allPrices.length) {
+						console.log("Not enough hours for a full charge tonight")
 						chargeNow()
-					}        
-				}
-			}) // getHoursNeeded
+					} else {
+						if (timeIsNow(allPrices, hoursNeeded)) {
+							console.log("Now is a good time to start chargeing")
+							chargeNow()
+						}
+					}
+				}) // getHoursNeeded
 
-		}) // getPrices
-	
+			}) // getPrices
 
-	} // if
+
+		} // if
+
+	})
 
 })
 
@@ -67,7 +103,7 @@ function getPrices(to, _callback) {
 	console.log("Get prices for " + to )
 
 	prices.hourly(options, (error, results) => {
-		if (error) console.err(error)
+		if (error) console.error(error)
 
 		for (let i=0; i<results.length; i++) {
 			arr.push({
@@ -86,7 +122,7 @@ function removeUntilNow(arr) {
 	for (let key in arr) {
 
 		time = moment(arr[key].date).format("YYYYMMDDHH00")
-		
+
 		if (time < now) {
 			delete arr[key]
 		}
@@ -120,9 +156,9 @@ function getHoursNeeded(_callback) {
 					if(json.BatteryStatusRecords.PluginState == "NOT_CONNECTED") {
 						console.log("Car not connected")
 					} else {
-						
+
 						if(json.BatteryStatusRecords.BatteryStatus.BatteryChargingStatus == "NOT_CHARGING") {
-							
+
 							let hoursNeeded = json.BatteryStatusRecords.TimeRequiredToFull200.HourRequiredToFull
 
 							// If there is need to charge, but not for a full hours
@@ -147,7 +183,7 @@ function getHoursNeeded(_callback) {
 				})
 			}, 60*1000) // wait 60 seconds to get info from car (40 s needed when last tested)
 		})
-		
+
 	})
 }
 
@@ -173,7 +209,7 @@ function api(action, _callback) {
 
 	} else {
 
-			q = "custom_sessionid=" + sessionid + "&RegionCode=" + region_code + "&VIN=" + vin
+		q = "custom_sessionid=" + sessionid + "&RegionCode=" + region_code + "&VIN=" + vin
 
 	} // if login
 
@@ -220,7 +256,7 @@ function timeIsNow(allPrices, hoursNeeded) {
 	})
 	console.log("Best price first:")
 	console.log(allPrices)
-	
+
 	const now = moment().format("HH00");
 
 	for (let i = 0; i < hoursNeeded; i++) {
@@ -228,7 +264,7 @@ function timeIsNow(allPrices, hoursNeeded) {
 
 		console.log("Charge at " + time + ", now is " + now)
 		if (time == now) {
-			
+
 			return true
 			break
 
@@ -238,5 +274,5 @@ function timeIsNow(allPrices, hoursNeeded) {
 
 function chargeNow() {
 	console.log("Charge car now")
-	// api("BatteryRemoteChargingRequest", () => {})
+	api("BatteryRemoteChargingRequest", () => {})
 }

@@ -1,12 +1,14 @@
 {
   "name": "charge-cheap",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Check number of hours your Nissan EV needs to be charged, look for the cheapest hours from now until next morning using Nord Pool, and start charging if not already charging.",
   "main": "index.js",
   "dependencies": {
+    "check-update-github": "0.0.4",
     "crypto": "0.0.3",
     "dotenv": "^4.0.0",
     "https": "^1.0.0",
+    "node-cron": "^1.2.0",
     "nordpool": "^2.0.0"
   },
   "devDependencies": {},
@@ -16,8 +18,8 @@
   },
   "author": "Jakob Nanneson",
   "license": "MIT",
-  "repository" : {
-    "type" : "git",
-    "url" : "https://github.com/jensjakob/charge-cheap.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jensjakob/charge-cheap.git"
   }
 }
