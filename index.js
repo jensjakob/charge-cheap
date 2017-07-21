@@ -20,9 +20,7 @@ checkUpdate({
 	}, function(err, latestVersion, defaultMessage){
 	if(!err){
 		console.log("")
-		console.log("=== WARNING! ===================")
-		console.warn(defaultMessage);
-		console.log("================================")
+		console.log(defaultMessage);
 		console.log("")
 	}
 });
@@ -33,8 +31,8 @@ if (process.env.USERNAME == undefined) {
 	console.log("================================")
 	console.log("")
 	console.log("Create an .env file including:")
-	console.log("USERNAME: ")
-	console.log("PASSWORD: ")
+	console.log("USERNAME=")
+	console.log("PASSWORD=")
 	console.log("")
 }
 
