@@ -50,11 +50,18 @@ cron.schedule('0 0-7,17-23 * * *', () => {
 		
 		getPrices(today + " 07:00", (morningPrices) => {
 
+			console.log("Prices for this morning:")
+			console.log(morningPrices)
+
+			console.log("Remove old prices")
 			morningPrices = removeUntilNow(morningPrices)
+			console.log(morningPrices)
 
 			getHoursNeeded((hoursNeeded) => {
+				console.log("Hours needed: " + hoursNeeded)
+
 				if (hoursNeeded > morningPrices.length) {
-					console.log("Not enough hours for a full charge this morning")
+					console.log("Not enough hours for a full charge this morning, start asap")
 					chargeNow()
 				} else {
 					if (timeIsNow(morningPrices, hoursNeeded)) {
