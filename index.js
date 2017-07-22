@@ -40,16 +40,34 @@ let q, sessionid, vin
 
 const today = moment().format("YYYY-MM-DD")
 const tomorrow = moment().add(1,"d").format("YYYY-MM-DD")
+const todaytime = moment().format("HHmm")
 
 console.log("Function will run during evening and night, each hour between 17pm and 7am")
 cron.schedule('0 0-7,17-23 * * *', () => {
 
-	getPrices(tomorrow + " 07:00", (allPrices) => {
+	//if in the morning (code won't run during day)
+	if (todaytime < 1700) {
+		
+		getPrices(today + " 07:00", (morningPrices) => {
 
-		console.log("Check if you've got tomorrows prices")
-		if (allPrices.length == 0) {
-			console.log("No prices yet, check again in the afternoon")
-		} else {
+			morningPrices = removeUntilNow(morningPrices)
+
+			getHoursNeeded((hoursNeeded) => {
+				if (hoursNeeded > morningPrices.length) {
+					console.log("Not enough hours for a full charge this morning")
+					chargeNow()
+				} else {
+					if (timeIsNow(morningPrices, hoursNeeded)) {
+						console.log("Now is a good time to start chargeing")
+						chargeNow()
+					}
+				}
+			})
+		})
+
+	} else {
+
+		getPrices(tomorrow + " 07:00", (allPrices) => {
 
 			console.log("Tomorrows prices until 7am:")
 			console.log(allPrices)
@@ -82,10 +100,8 @@ cron.schedule('0 0-7,17-23 * * *', () => {
 
 			}) // getPrices
 
-
-		} // if
-
-	})
+		}) // getPrices
+	}
 
 })
 
