@@ -46,7 +46,7 @@ console.log("Function will run during evening and night, each hour between 17pm 
 cron.schedule('0 0-7,17-23 * * *', () => {
 
 	//if in the morning (code won't run during day)
-	if (todaytime < 1700) {
+	if (todaytime < "1700") {
 		
 		getPrices(today + " 07:00", (morningPrices) => {
 
@@ -180,21 +180,26 @@ function getHoursNeeded(_callback) {
 
 						if(json.BatteryStatusRecords.BatteryStatus.BatteryChargingStatus == "NOT_CHARGING") {
 
-							let hoursNeeded = json.BatteryStatusRecords.TimeRequiredToFull200.HourRequiredToFull
+							if (json.BatteryStatusRecords.TimeRequiredToFull200.HourRequiredToFull) {
 
-							// If there is need to charge, but not for a full hours
-							if (hoursNeeded == 0) {
-								hoursNeeded = 1
+								let hoursNeeded = json.BatteryStatusRecords.TimeRequiredToFull200.HourRequiredToFull
+
+								// If there is need to charge, but not for a full hours
+								if (hoursNeeded == 0) {
+									hoursNeeded = 1
+								}
+
+								// We just check for full hours.
+
+								console.log("Hours needed: " + hoursNeeded)
+								_callback(hoursNeeded)
+
+							} else {
+
+								console.log("MinutesRequiredToFull can't be found. No need to charge.")
+								_callback(0)
+
 							}
-
-							// Check to se if we need to add an extra hour, for shorter periods it's better to wait
-							// Don't know if this can be the case, or if it always shows half hours
-							if (json.BatteryStatusRecords.TimeRequiredToFull200.MinutesRequiredToFull > 40) {
-								hoursNeeded += 1
-							}
-
-							console.log("Hours needed: " + hoursNeeded)
-							_callback(hoursNeeded)
 
 						} else {
 							console.log("Car is already chargeing, can't stop it")
