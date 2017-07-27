@@ -180,7 +180,7 @@ function getHoursNeeded(_callback) {
 
 						if(json.BatteryStatusRecords.BatteryStatus.BatteryChargingStatus == "NOT_CHARGING") {
 
-							if (json.BatteryStatusRecords.TimeRequiredToFull200.HourRequiredToFull === undefined) {
+							if (json.BatteryStatusRecords.TimeRequiredToFull200.HourRequiredToFull !== undefined) {
 
 								let hoursNeeded = json.BatteryStatusRecords.TimeRequiredToFull200.HourRequiredToFull
 
@@ -196,7 +196,7 @@ function getHoursNeeded(_callback) {
 
 							} else {
 
-								console.log("MinutesRequiredToFull can't be found. No need to charge.")
+								console.log("HourRequiredToFull can't be found. No need to charge.")
 								_callback(0)
 
 							}
