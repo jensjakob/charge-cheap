@@ -25,7 +25,7 @@ checkUpdate({
 	}
 });
 
-if (process.env.USERNAME == undefined) {
+if (typeof process.env.USERNAME === "undefined") {
 	console.log("=== ERROR! ===================")
 	console.error("Username/password is missing.")
 	console.log("================================")
@@ -180,7 +180,7 @@ function getHoursNeeded(_callback) {
 
 						if(json.BatteryStatusRecords.BatteryStatus.BatteryChargingStatus == "NOT_CHARGING") {
 
-							if (json.BatteryStatusRecords.TimeRequiredToFull200.HourRequiredToFull !== undefined) {
+							if (typeof json.BatteryStatusRecords.TimeRequiredToFull200.HourRequiredToFull !== "undefined") {
 
 								let hoursNeeded = json.BatteryStatusRecords.TimeRequiredToFull200.HourRequiredToFull
 
