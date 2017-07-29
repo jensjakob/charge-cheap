@@ -172,40 +172,47 @@ function getHoursNeeded(_callback) {
 			setTimeout(() => {
 				api("BatteryStatusRecordsRequest", (json) => {
 					console.log(json)
-					// console.log("Hours needed: " + json.BatteryStatusRecords.TimeRequiredToFull200.HourRequiredToFull)
 
-					if(json.BatteryStatusRecords.PluginState == "NOT_CONNECTED") {
-						console.log("Car not connected")
-					} else {
+					try {
 
-						if(json.BatteryStatusRecords.BatteryStatus.BatteryChargingStatus == "NOT_CHARGING") {
+						let hoursNeeded = json.BatteryStatusRecords.TimeRequiredToFull200.HourRequiredToFull
 
-							if (typeof json.BatteryStatusRecords.TimeRequiredToFull200.HourRequiredToFull !== "undefined") {
-
-								let hoursNeeded = json.BatteryStatusRecords.TimeRequiredToFull200.HourRequiredToFull
-
-								// If there is need to charge, but not for a full hours
-								if (hoursNeeded == 0) {
-									hoursNeeded = 1
-								}
-
-								// We just check for full hours.
-
-								console.log("Hours needed: " + hoursNeeded)
-								_callback(hoursNeeded)
-
-							} else {
-
-								console.log("HourRequiredToFull can't be found. No need to charge.")
-								_callback(0)
-
-							}
-
-						} else {
-							console.log("Car is already chargeing, can't stop it")
+						// If there is need to charge, but not for a full hours
+						if (hoursNeeded == 0) {
+							hoursNeeded = 1
 						}
 
+						// We just check for full hours.
+
+						console.log("Hours needed: " + hoursNeeded)
+
+						_callback(hoursNeeded)
+
+					} catch(e) {
+
+						console.log("Might not need charging")
+						_callback(0)
+
 					}
+
+					// Check if already charging
+					try {
+						if(json.BatteryStatusRecords.BatteryStatus.BatteryChargingStatus != "NOT_CHARGING") {
+							console.log("Car is already chargeing, can't stop it")
+						}
+					} catch(e) {
+						console.log("Don't know if car is charging")
+					}
+
+					// Check if not connected
+					try {
+						if(json.BatteryStatusRecords.PluginState == "NOT_CONNECTED") {
+							console.log("Car not connected")
+						}
+					} catch(e) {
+						console.log("Don't know if car is connected")
+					}
+
 				})
 			}, 60*1000) // wait 60 seconds to get info from car (40 s needed when last tested)
 		})
