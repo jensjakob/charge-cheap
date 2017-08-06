@@ -204,24 +204,6 @@ function getHoursNeeded(_callback) {
 
 					}
 
-					// Check if already charging
-					try {
-						if(json.BatteryStatusRecords.BatteryStatus.BatteryChargingStatus != "NOT_CHARGING") {
-							console.log("Car is already chargeing, can't stop it")
-						}
-					} catch(e) {
-						console.log("Don't know if car is charging")
-					}
-
-					// Check if not connected
-					try {
-						if(json.BatteryStatusRecords.PluginState == "NOT_CONNECTED") {
-							console.log("Car not connected")
-						}
-					} catch(e) {
-						console.log("Don't know if car is connected")
-					}
-
 				})
 			}, 60*1000) // wait 60 seconds to get info from car (40 s needed when last tested)
 		})
@@ -315,6 +297,48 @@ function timeIsNow(allPrices, hoursNeeded) {
 }
 
 function chargeNow() {
-	console.log("Charge car now")
-	api("BatteryRemoteChargingRequest", () => {})
+
+	console.log("Is car ready to be charged?")
+
+	if (isCarReady()) {
+		console.log("Charge car now")
+		api("BatteryRemoteChargingRequest", () => {})
+	}
+}
+
+function isCarReady() {
+
+	let carReady = true
+
+	// You need to login and wait for fresh data first, then...
+	api("BatteryStatusRecordsRequest", (json) => {
+
+		console.log(json)
+
+		// Check if already charging
+		try {
+			if(json.BatteryStatusRecords.BatteryStatus.BatteryChargingStatus != "NOT_CHARGING") {
+				console.log("Car is already chargeing, can't stop it")
+				carReady = false
+			}
+		} catch(e) {
+			console.log("Don't know if car is charging")
+			carReady = false
+		}
+
+		// Check if not connected
+		try {
+			if(json.BatteryStatusRecords.PluginState == "NOT_CONNECTED") {
+				console.log("Car not connected")
+				carReady = false
+			}
+		} catch(e) {
+			console.log("Don't know if car is connected")
+			carReady = false
+		}
+
+		return carReady;
+
+	})
+
 }
