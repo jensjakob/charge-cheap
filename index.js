@@ -66,19 +66,26 @@ function run() {
 			morningPrices = removeUntilNow(morningPrices)
 			console.log(morningPrices)
 
-			getHoursNeeded((hoursNeeded) => {
-				console.log("Hours needed: " + hoursNeeded)
+			if (morningPrices.length > 0 ) {
+			
+				getHoursNeeded((hoursNeeded) => {
+					console.log("Hours needed: " + hoursNeeded)
 
-				if (hoursNeeded > morningPrices.length) {
-					console.log("Not enough hours for a full charge this morning, start asap")
-					chargeNow()
-				} else {
-					if (timeIsNow(morningPrices, hoursNeeded)) {
-						console.log("Now is a good time to start chargeing")
+					if (hoursNeeded > morningPrices.length) {
+						console.log("Not enough hours for a full charge this morning, start asap")
 						chargeNow()
+					} else {
+						if (timeIsNow(morningPrices, hoursNeeded)) {
+							console.log("Now is a good time to start chargeing")
+							chargeNow()
+						}
 					}
-				}
-			})
+				})
+
+			} else {
+				console.log("No hours left this morning, wait until evening")
+			}
+
 		})
 
 	} else {
@@ -169,6 +176,9 @@ function cleanArray(arr) {
 function getHoursNeeded(_callback) {
 
 	api("UserLoginRequest", (json) => {
+
+		console.log(json)
+
 		if (json.VehicleInfoList) {
 			sessionid = encodeURIComponent(json.VehicleInfoList.vehicleInfo[0].custom_sessionid)
 			vin = encodeURIComponent(json.VehicleInfoList.vehicleInfo[0].vin)
@@ -176,6 +186,7 @@ function getHoursNeeded(_callback) {
 			sessionid = encodeURIComponent(json.vehicleInfo[0].custom_sessionid)
 			vin = encodeURIComponent(json.vehicleInfo[0].vin)
 		}
+		
 		api("BatteryStatusCheckRequest", () => {
 			console.log("Receiving data from car... (wait one minute)")
 			setTimeout(() => {
