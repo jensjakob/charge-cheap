@@ -40,7 +40,7 @@ let q, sessionid, vin
 
 const today = moment().format("YYYY-MM-DD")
 const tomorrow = moment().add(1,"d").format("YYYY-MM-DD")
-const todaytime = moment().format("HHmm")
+const todaytime = Number(moment().format("HHmm"))
 
 console.log("Function will run during evening and night, each hour between 17pm and 7am")
 cron.schedule('0 0-7,17-23 * * *', () => {
@@ -55,7 +55,7 @@ setTimeout(() => {
 function run() {
 
 	//if in the morning (code won't run during day)
-	if (todaytime < "1700") {
+	if (todaytime < 1700) {
 		
 		getPrices(today + " 07:00", (morningPrices) => {
 
