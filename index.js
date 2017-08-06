@@ -44,6 +44,15 @@ const todaytime = moment().format("HHmm")
 
 console.log("Function will run during evening and night, each hour between 17pm and 7am")
 cron.schedule('0 0-7,17-23 * * *', () => {
+	run();
+})
+
+console.log("Run once in 3 seconds...")
+setTimeout(() => {
+	run();
+}, 3*1000)
+
+function run() {
 
 	//if in the morning (code won't run during day)
 	if (todaytime < "1700") {
@@ -110,7 +119,7 @@ cron.schedule('0 0-7,17-23 * * *', () => {
 		}) // getPrices
 	}
 
-})
+}
 
 
 function getPrices(to, _callback) {
