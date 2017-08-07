@@ -216,7 +216,7 @@ function getHoursNeeded(_callback) {
 
 					} catch(e) {
 
-						console.log("Might not need charging")
+						console.log("Can't see any need for charging")
 						_callback(0)
 
 					}
