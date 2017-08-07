@@ -189,6 +189,7 @@ function getHoursNeeded(_callback) {
 		
 		api("BatteryStatusCheckRequest", () => {
 			console.log("Receiving data from car... (wait one minute)")
+			
 			setTimeout(() => {
 				api("BatteryStatusRecordsRequest", (json) => {
 					console.log(json)
@@ -287,24 +288,56 @@ function api(action, _callback) {
 function timeIsNow(allPrices, hoursNeeded) {
 
 	allPrices.sort((a, b) => {
-		return a.price-b.price
+		return moment(a.date).format("YYYYMMDDHH00")-moment(b.date).format("YYYYMMDDHH00")
 	})
-	console.log("Best price first:")
+
+	console.log("Sorted by date:")
 	console.log(allPrices)
 
-	const now = moment().format("HH00");
-
-	for (let i = 0; i < hoursNeeded; i++) {
-		time = moment(allPrices[i].date).format("HHmm");
-
-		console.log("Charge at " + time + ", now is " + now)
-		if (time == now) {
-
-			return true
-			break
-
-		}
+	let bestStart = { // Default values
+		time: "0300",
+		sum: 9999
 	}
+
+	for (let hour = 0; hour < (allPrices.length - hoursNeeded +1); hour++) {
+		let sum = 0
+
+		console.log("Checking hour " + moment(allPrices[hour].date).format("HHmm"))
+
+		for (let price = 0; price < hoursNeeded; price++) {
+			console.log("hour " +hour)
+			console.log("price " +price)
+			sum += parseFloat(allPrices[hour+price].price)
+			console.log("Added to sum: " + parseFloat(allPrices[hour+price].price))
+		}
+
+		console.log("The sum is now " +sum)
+
+		if (sum < bestStart.sum) {
+			console.log("New best start time")
+			bestStart = {
+				time: moment(allPrices[hour].date).format("HHmm"),
+				sum: sum
+			}
+		}
+
+		console.log("Best start: " + bestStart.time)
+		console.log("Best sum: " + bestStart.sum)
+		
+		sum = 0;
+	
+	}
+
+	console.log("Final best start: " + bestStart.time)
+	console.log("Final best sum: " + bestStart.sum)
+
+	const now = moment().format("HH00");
+	const time = bestStart.time
+
+	if (time == now) {
+		return true
+	}
+
 }
 
 function chargeNow() {
