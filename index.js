@@ -44,12 +44,12 @@ const todaytime = Number(moment().format("HHmm"))
 
 console.log("Function will run during evening and night, each hour between 17pm and 7am")
 cron.schedule('0 0-7,17-23 * * *', () => {
-	run();
+	run()
 })
 
 console.log("Run once in 3 seconds...")
 setTimeout(() => {
-	run();
+	run()
 }, 3*1000)
 
 function run() {
@@ -71,15 +71,18 @@ function run() {
 				getHoursNeeded((hoursNeeded) => {
 					console.log("Hours needed: " + hoursNeeded)
 
-					if (hoursNeeded > morningPrices.length) {
-						console.log("Not enough hours for a full charge this morning, start asap")
-						chargeNow()
-					} else {
-						if (timeIsNow(morningPrices, hoursNeeded)) {
-							console.log("Now is a good time to start chargeing")
+					if (hoursNeeded > 0) {
+						if (hoursNeeded > morningPrices.length) {
+							console.log("Not enough hours for a full charge this morning, start asap")
 							chargeNow()
+						} else {
+							if (timeIsNow(morningPrices, hoursNeeded)) {
+								console.log("Now is a good time to start chargeing")
+								chargeNow()
+							}
 						}
 					}
+
 				})
 
 			} else {
@@ -110,13 +113,15 @@ function run() {
 				console.log("Finding out how many hours of chargeing is needed")
 
 				getHoursNeeded((hoursNeeded) => {
-					if (hoursNeeded > allPrices.length) {
-						console.log("Not enough hours for a full charge tonight")
-						chargeNow()
-					} else {
-						if (timeIsNow(allPrices, hoursNeeded)) {
-							console.log("Now is a good time to start chargeing")
+					if (hoursNeeded > 0) {
+						if (hoursNeeded > allPrices.length) {
+							console.log("Not enough hours for a full charge tonight")
 							chargeNow()
+						} else {
+							if (timeIsNow(allPrices, hoursNeeded)) {
+								console.log("Now is a good time to start chargeing")
+								chargeNow()
+							}
 						}
 					}
 				}) // getHoursNeeded
