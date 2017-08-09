@@ -347,15 +347,19 @@ function timeIsNow(allPrices, hoursNeeded) {
 
 function chargeNow() {
 
-	console.log("Is car ready to be charged?")
+	console.log("Is the car ready to be charged?")
 
-	if (isCarReady()) {
-		console.log("Charge car now")
-		api("BatteryRemoteChargingRequest", () => {})
-	}
+	isCarReady((ready) => {
+		if(ready) {
+			console.log("Charge car now")
+			api("BatteryRemoteChargingRequest", () => {})
+		} else {
+			console.log("Car is not ready")
+		}
+	})
 }
 
-function isCarReady() {
+function isCarReady(_callback) {
 
 	let carReady = true
 
@@ -364,29 +368,35 @@ function isCarReady() {
 
 		console.log(json)
 
-		// Check if already charging
+		console.log("Check if already charging")
 		try {
 			if(json.BatteryStatusRecords.BatteryStatus.BatteryChargingStatus != "NOT_CHARGING") {
 				console.log("Car is already chargeing, can't stop it")
 				carReady = false
+			} else {
+				console.log("Car is not charging")
 			}
 		} catch(e) {
 			console.log("Don't know if car is charging")
 			carReady = false
 		}
 
-		// Check if not connected
+		console.log("Check if not connected")
 		try {
 			if(json.BatteryStatusRecords.PluginState == "NOT_CONNECTED") {
 				console.log("Car not connected")
 				carReady = false
+			} else {
+				console.log("Car is connected")
 			}
 		} catch(e) {
 			console.log("Don't know if car is connected")
 			carReady = false
 		}
 
-		return carReady;
+		console.log("carReady is " + carReady)
+		
+		_callback(carReady)
 
 	})
 

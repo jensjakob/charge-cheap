@@ -1,6 +1,6 @@
 {
   "name": "charge-cheap",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "description": "Check number of hours your Nissan EV needs to be charged, look for the cheapest hours from now until next morning using Nord Pool, and start charging if not already charging.",
   "main": "index.js",
   "dependencies": {
