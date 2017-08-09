@@ -339,8 +339,14 @@ function timeIsNow(allPrices, hoursNeeded) {
 	const now = moment().format("HH00");
 	const time = bestStart.time
 
+	console.log("Now is " + now)
+	console.log("The time is " + time)
+
 	if (time == now) {
+		console.log("The time is now")
 		return true
+	} else {
+		console.log("This time is not now")
 	}
 
 }
