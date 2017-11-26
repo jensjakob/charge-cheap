@@ -14,6 +14,15 @@ Don't forget adding your username and password to the .env-file
 
 Exit using ctrl+c
 
+## Dependencies
+* nodejs (including npm)
+```
+curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
+sudo apt-get install nodejs
+```
+Installing Node.js with package manager:
+https://nodejs.org/en/download/package-manager
+
 ## Update
 
 It will check for new versions, update using ``git pull && npm update``
